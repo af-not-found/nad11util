@@ -1,0 +1,25 @@
+body {
+	background-color: white;
+	margin: 2px;
+}
+
+#main_container {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	min-width: 190px;
+}
+
+#main_container>div {
+	text-align: center;
+}
+
+#settings_container {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	line-height: 200%;
+	min-width: 210px;
+}

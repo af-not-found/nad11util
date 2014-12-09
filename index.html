@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>NAD11 utility</title>
+<link href="assets/style.css" rel="stylesheet" type="text/css">
+
+<script src="js/jquery-2.1.1.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/index.js"></script>
+</head>
+
+<body>
+	<img id="settings_toggle" src="assets/settings.png" style="float: right; cursor: pointer;">
+	<img id="loading" src="assets/loading.gif" style="float: right; margin-right: 5px">
+
+	<div id="main_container">
+		<div>
+			<span id="ajax1">N/A, batt=N/A, ant=0/0</span>
+		</div>
+		<div id="error" style="color: red;"></div>
+
+		<div style="margin: 8px 0 8px 40px;">
+			<div style="text-align: left;">
+				<input type="checkbox" name="cb_hs" id="cb_hs" disabled="disabled"> <label for="cb_hs">HS mode</label><img id="reload"
+					src="assets/reload.png" style="cursor: pointer; margin-left: 10px;">
+			</div>
+			<div style="text-align: left;">
+				<input type="checkbox" name="cb_keep2" id="cb_keep2"> <label for="cb_keep2">Keep WiMAX 2+</label>
+			</div>
+		</div>
+		<div>
+			<button id="reconn">Re-connect WiMAX</button>
+		</div>
+	</div>
+</body>
+
+</html>

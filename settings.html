@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>settings - NAD11 utility</title>
+<link href="assets/style.css" rel="stylesheet" type="text/css">
+
+<script src="js/jquery-2.1.1.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/settings.js"></script>
+</head>
+
+<body>
+	<div id="settings_container">
+		<div>
+			web admin password <input type="password" name="password" id="password" value="" style="width: 90px">
+		</div>
+		<div>
+			status check interval <input type="text" name="interval" id="interval" maxlength="3" style="width: 30px">sec
+		</div>
+		<div>
+			<input type="checkbox" name="cb_notif" id="cb_notif"> <label for="cb_notif">notify when status changed</label>
+		</div>
+		<div>
+			notify when battery over <input type="text" name="batt_notif_over" id="batt_notif_over" maxlength="3" style="width: 30px">%
+		</div>
+		<div>
+			notify when battery under <input type="text" name="batt_notif_under" id="batt_notif_under" maxlength="3" style="width: 30px">%
+		</div>
+
+		<div style="margin-top: 15px; text-align: center;">
+			<button id="cancel">cancel</button>
+			<button id="save" style="margin-left: 50px">save</button>
+		</div>
+	</div>
+</body>
+
+</html>
