@@ -10,6 +10,7 @@ app.init = function() {
 		app.settings.cb_notif = $("#cb_notif").prop("checked");
 		app.settings.batt_notif_over = $("#batt_notif_over").val();
 		app.settings.batt_notif_under = $("#batt_notif_under").val();
+		app.settings.reconn_interval = $("#reconn_interval").val();
 
 		chrome.storage.sync.set(app.settings);
 
@@ -24,6 +25,7 @@ app.init = function() {
 		$("#cb_notif").prop("checked", app.settings.cb_notif);
 		$("#batt_notif_over").val(app.settings.batt_notif_over);
 		$("#batt_notif_under").val(app.settings.batt_notif_under);
+		$("#reconn_interval").val(app.settings.reconn_interval);
 	});
 }
 

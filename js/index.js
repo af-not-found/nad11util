@@ -1,5 +1,14 @@
-app.routerInfo = {};
+app.routerInfo = {
+	antennaLevel : "",
+	battery : "N/A",
+	charging : false,
+	comSetting : 0,
+	comState : 0,
+	profile : 0,
+	connDuration : 0
+};
 app.sessionId = "";
+app.sessionIdInfoBtn = "";
 app.getStatusCount = -1;
 app.callbackRemain = 0;
 app.timer = undefined;
@@ -32,19 +41,13 @@ app.init = function() {
 		});
 	});
 
-	$("#cb_hs").click(app.toggleMode);
-
-	$("#reconn").click(app.reconnWimax);
-
-	$("#reload").click(app.reload);
-
 	$("#settings_toggle").click(function() {
 		chrome.app.window.create('settings.html', {
 			id : "nad11util_settings",
-			width : 280,
-			height : 200,
-			minWidth : 280,
-			minHeight : 200,
+			width : 340,
+			height : 220,
+			minWidth : 340,
+			minHeight : 220,
 			resizable : true,
 			frame : "chrome"
 		}, function(createdWindow) {
@@ -56,6 +59,14 @@ app.init = function() {
 		});
 	});
 
+	$("#cb_hs").click(app.toggleMode);
+
+	$("#reload").click(app.reload);
+
+	$("#reconn").click(app.reconnWimax);
+
+	$("#standby").click(app.standby);
+
 	chrome.app.window.current().onClosed.addListener(function() {
 		app.stopTimer();
 		chrome.app.window.get("nad11util_settings").close();
@@ -65,7 +76,7 @@ app.init = function() {
 app.startTimer = function(delay) {
 	clearTimeout(app.timer);
 	if (delay === undefined) {
-		delay = new Number(app.settings.interval) * 1000;
+		delay = parseInt(app.settings.interval) * 1000;
 		delay = Math.max(delay, 5000);
 	}
 	app.timer = setTimeout(app.getStatus, delay)
@@ -108,6 +119,11 @@ app.toggleMode = function() {
 	app.updateIndexInfo(f);
 }
 
+app.reload = function() {
+	app.getStatusCount = -1;
+	app.startTimer(1);
+}
+
 app.reconnWimax = function() {
 	app.stopTimer();
 	app.lastw2time = -1;
@@ -138,11 +154,6 @@ app.reconnWimax = function() {
 	app.updateIndexInfo(f);
 }
 
-app.reload = function() {
-	app.getStatusCount = -1;
-	app.startTimer(1);
-}
-
 app.updateIndexInfo = function(successCallback, completeCallback) {
 
 	$.ajax({
@@ -154,10 +165,19 @@ app.updateIndexInfo = function(successCallback, completeCallback) {
 	}).done(function(data, textStatus) {
 		var r = app.routerInfo;
 		try {
-			var html = $.parseHTML(data);
-			r.comSetting = $(html).find("select#COM_MODE_SEL option[selected=selected]")[0].value;
-			r.profile = $(html).find("select#SELECT_PROFILE option[selected=selected]")[0].value;
-			app.sessionId = $(html).find("#SESSION_ID")[0].value;
+			var html = $($.parseHTML(data));
+			r.comSetting = html.find("select#COM_MODE_SEL option[selected=selected]")[0].value;
+			r.profile = html.find("select#SELECT_PROFILE option[selected=selected]")[0].value;
+			app.sessionId = html.find("#SESSION_ID")[0].value;
+
+			html.find("li.label").each(function() {
+				var e = $(this);
+				if (e.text().indexOf("接続時間") != -1) {
+					var txt = e.next("li.value").text(); // 12:34:56
+					r.connDuration = parseInt(txt);
+				}
+			});
+
 			if (successCallback) {
 				successCallback();
 			}
@@ -172,7 +192,57 @@ app.updateIndexInfo = function(successCallback, completeCallback) {
 		r.profile = 0;
 		$("#error").text("index_contents failed, " + errorThrown);
 	});
+}
 
+app.standby = function() {
+	app.stopTimer();
+	app.lastw2time = -1;
+	$(this).prop("disabled", true);
+	$("#loading").show();
+
+	var f = function() {
+		$.ajax({
+			url : "http://aterm.me/index.cgi/info_btn_btstandby",
+			type : "POST",
+			username : "admin",
+			password : app.settings.password,
+			data : {
+				"PERMIT_MODEL" : "enable",
+				"DISABLED_CHECKBOX" : "",
+				"CHECK_ACTION_MODE" : "1",
+				"SESSION_ID" : app.sessionIdInfoBtn
+			}
+		}).done(function(data, textStatus) {
+			$("#error").text("standby failed, " + textStatus);
+		}).fail(function(jqXHR, textStatus, errorThrown) {
+			$("#error").text("standby succeeded, " + errorThrown);
+		});
+	}
+
+	app.updateInfoBtnInfo(f);
+}
+
+app.updateInfoBtnInfo = function(successCallback, completeCallback) {
+
+	$.ajax({
+		url : "http://aterm.me/index.cgi/info_btn",
+		dataType : "html",
+		username : "admin",
+		password : app.settings.password,
+		complete : completeCallback
+	}).done(function(data, textStatus) {
+		try {
+			var html = $($.parseHTML(data));
+			app.sessionIdInfoBtn = html.find("#SESSION_ID")[0].value;
+			if (successCallback) {
+				successCallback();
+			}
+		} catch (e) {
+			$("#error").text("info_btn parsing failed, " + e);
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown) {
+		$("#error").text("info_btn failed, " + errorThrown);
+	});
 }
 
 app.getStatus = function() {
@@ -198,13 +268,13 @@ app.getStatus = function() {
 
 			switch (i) {
 			case 0:
-				r.battery = new Number(data);
+				r.battery = parseInt(data);
 				break;
 			case 1:
-				r.antennaLevel = new Number(data);
+				r.antennaLevel = parseInt(data);
 				break;
 			case 2:
-				r.comState = new Number(data);
+				r.comState = parseInt(data);
 				break;
 			case 4:
 				r.charging = data != "1";
@@ -233,14 +303,18 @@ app.callback = function() {
 	$("#loading").hide();
 
 	var comStateStrs = [ "N/A", "WiMAX 2+", "WiMAX 1", "Wi-Fi spot" ];
+	var comStateTitleStrs = [ "N/A", "W2+", "W1", "SP" ];
 	var antMaxs = [ 0, 4, 5, 5 ];
 	// var comSettingStrs = [ "N/A", "HS", "NL" ];
 
 	var r = app.routerInfo;
 	status = comStateStrs[r.comState] + ", batt=" + r.battery + (r.charging ? "+" : "%") + ", ant=" + r.antennaLevel + "/"
 			+ antMaxs[r.comState];
+	statusTitle = comStateTitleStrs[r.comState] + " " + r.battery + (r.charging ? "+" : "%") + " " + r.antennaLevel + "/"
+			+ antMaxs[r.comState];
 
 	$("#ajax1").text(status);
+	$("#main_title").text(statusTitle + " - NAD11 utility");
 
 	if (r.comSetting == 0) {
 		$("#cb_hs").prop("disabled", true);
@@ -251,9 +325,9 @@ app.callback = function() {
 
 	if (app.prevBatt != -1) {
 		var message = null;
-		if (r.battery > new Number(app.settings.batt_notif_over) && r.battery > app.prevBatt) {
+		if (r.battery > parseInt(app.settings.batt_notif_over) && r.battery > app.prevBatt) {
 			message = "battery level over " + app.settings.batt_notif_over + "%";
-		} else if (r.battery < new Number(app.settings.batt_notif_under) && r.battery < app.prevBatt) {
+		} else if (r.battery < parseInt(app.settings.batt_notif_under) && r.battery < app.prevBatt) {
 			message = "battery level under " + app.settings.batt_notif_under + "%";
 		}
 		if (message != null) {
@@ -292,7 +366,22 @@ app.callback = function() {
 				type : "basic",
 				title : "NAD11 utility",
 				iconUrl : 'assets/icon.png',
-				message : "upgrading to WiMAX 2+ ..."
+				message : t("main.upgrading")
+			}, function() {
+			});
+			app.reconnWimax();
+		}
+	}
+
+	if (r.comState == 1 && app.settings.reconn_interval) {
+		var rival = parseInt(app.settings.reconn_interval);
+		if (rival <= app.routerInfo.connDuration) {
+			next = false;
+			chrome.notifications.create("appnif_keep", {
+				type : "basic",
+				title : "NAD11 utility",
+				iconUrl : 'assets/icon.png',
+				message : t("main.reconn_every")
 			}, function() {
 			});
 			app.reconnWimax();
