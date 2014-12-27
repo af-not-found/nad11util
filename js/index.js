@@ -339,8 +339,8 @@ app.callback = function() {
 			}, function() {
 			});
 		}
+		app.prevBatt = r.battery;
 	}
-	app.prevBatt = r.battery;
 
 	if (app.settings.cb_notif && app.prevStatus != status) {
 		app.prevStatus = status;
