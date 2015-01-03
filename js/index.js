@@ -101,6 +101,7 @@ app.toggleMode = function() {
 			type : "POST",
 			username : "admin",
 			password : app.settings.password,
+			timeout : 10000,
 			data : {
 				"DISABLED_CHECKBOX" : "",
 				"CHECK_ACTION_MODE" : "1",
@@ -136,6 +137,7 @@ app.reconnWimax = function() {
 			type : "POST",
 			username : "admin",
 			password : app.settings.password,
+			timeout : 10000,
 			data : {
 				"DISABLED_CHECKBOX" : "",
 				"CHECK_ACTION_MODE" : "1",
@@ -161,6 +163,7 @@ app.updateIndexInfo = function(successCallback, completeCallback) {
 		dataType : "html",
 		username : "admin",
 		password : app.settings.password,
+		timeout : 10000,
 		complete : completeCallback
 	}).done(function(data, textStatus) {
 		var r = app.routerInfo;
@@ -206,6 +209,7 @@ app.standby = function() {
 			type : "POST",
 			username : "admin",
 			password : app.settings.password,
+			timeout : 10000,
 			data : {
 				"PERMIT_MODEL" : "enable",
 				"DISABLED_CHECKBOX" : "",
@@ -229,6 +233,7 @@ app.updateInfoBtnInfo = function(successCallback, completeCallback) {
 		dataType : "html",
 		username : "admin",
 		password : app.settings.password,
+		timeout : 10000,
 		complete : completeCallback
 	}).done(function(data, textStatus) {
 		try {
@@ -258,6 +263,7 @@ app.getStatus = function() {
 	$.ajax({
 		url : "http://aterm.me/index.cgi/status_get.xml",
 		dataType : "xml",
+		timeout : 3000,
 		complete : app.callback
 	}).done(function(data, textStatus) {
 		var r = app.routerInfo;
@@ -339,8 +345,8 @@ app.callback = function() {
 			}, function() {
 			});
 		}
-		app.prevBatt = r.battery;
 	}
+    app.prevBatt = r.battery;
 
 	if (app.settings.cb_notif && app.prevStatus != status) {
 		app.prevStatus = status;
