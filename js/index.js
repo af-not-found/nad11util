@@ -17,6 +17,7 @@ app.prevStatus = "";
 app.lastw2time = -1;
 app.keep2 = true;
 app.prevBatt = -1;
+app.prevCharging = undefined;
 
 app.updateSettings = function() {
 	chrome.storage.sync.get(app.settings, function(settings) {
@@ -329,14 +330,19 @@ app.callback = function() {
 	}
 	$("#reconn").prop("disabled", false);
 
-	if (app.prevBatt != -1) {
+    if (app.prevCharging != r.charging) {
+    	app.alertNotified = false;
+    }
+	
+	if (app.prevBatt != -1 && app.alertNotified == false) {
 		var message = null;
-		if (r.battery > parseInt(app.settings.batt_notif_over) && r.battery > app.prevBatt) {
+		if (r.battery > parseInt(app.settings.batt_notif_over) && r.battery > app.prevBatt && app.prevBatt > 0) {
 			message = "battery level over " + app.settings.batt_notif_over + "%";
 		} else if (r.battery < parseInt(app.settings.batt_notif_under) && r.battery < app.prevBatt) {
 			message = "battery level under " + app.settings.batt_notif_under + "%";
 		}
 		if (message != null) {
+	    	app.alertNotified = true;
 			chrome.notifications.create("appnif_batt", {
 				type : "basic",
 				title : "NAD11 utility",
@@ -347,6 +353,7 @@ app.callback = function() {
 		}
 	}
     app.prevBatt = r.battery;
+    app.prevCharging = r.charging;
 
 	if (app.settings.cb_notif && app.prevStatus != status) {
 		app.prevStatus = status;
