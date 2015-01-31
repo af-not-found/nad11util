@@ -18,7 +18,14 @@ $(document).ready(function() {
 			reconn : "WiMAX再接続",
 			standby : "ルータースタンバイ",
 			upgrading : "WiMAX 2+ 自動復帰中 ...",
-			reconn_every : "WiMAX 2+ 自動再接続中 ..."
+			reconn_every : "WiMAX 2+ 自動再接続中 ...",
+			standby_succeed : "スタンバイ成功",
+			standby_failed : "スタンバイ失敗",
+			auth_failed : "パスワードエラー",
+			retrieving_failed : "情報取得失敗",
+			setting_failed : "設定失敗",
+			batt_notif_over : "バッテリーレベルが次の値を超えました",
+			batt_notif_under : "バッテリーレベルが次の値を下回りました"
 		},
 		settings : {
 			password : "Web管理画面パスワード",
@@ -41,14 +48,21 @@ $(document).ready(function() {
 			reconn : "Re-connect WiMAX",
 			standby : "Standby router",
 			upgrading : "Upgrading to WiMAX 2+ ...",
-			reconn_every : "Auto Re-connecting ..."
+			reconn_every : "Auto Re-connecting ...",
+			standby_succeed : "Standby succeed",
+			standby_failed : "Standby failed",
+			auth_failed : "invalid password",
+			retrieving_failed : "retrieving failed",
+			setting_failed : "setting failed",
+			batt_notif_over : "battery level over",
+			batt_notif_under : "battery level under"
 		},
 		settings : {
 			password : "web admin password",
 			interval : "status check interval",
 			cb_notif : "notify when status changed",
-			batt_notif_over : "notify when battery over",
-			batt_notif_under : "notify when battery under",
+			batt_notif_over : "notify when battery level over",
+			batt_notif_under : "notify when battery level under",
 			reconn_interval : "Re-connect WiMAX 2+ every",
 			sec : "sec",
 			hour : "hour",

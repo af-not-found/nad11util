@@ -88,6 +88,22 @@ app.stopTimer = function() {
 	app.callbackRemain = 100;
 }
 
+app.error = function(msgkey, errorThrown) {
+
+	if (errorThrown) {
+		if (errorThrown.toLowerCase().indexOf("auth") != -1) {
+			errorThrown = ", " + t("main.auth_failed");
+		} else {
+			errorThrown = ", " + errorThrown;
+		}
+	} else {
+		errorThrown = "";
+	}
+
+	$("#error").text(t(msgkey) + errorThrown);
+	$("#loading").hide();
+}
+
 app.toggleMode = function() {
 	app.stopTimer();
 	app.lastw2time = -1;
@@ -102,7 +118,7 @@ app.toggleMode = function() {
 			type : "POST",
 			username : "admin",
 			password : app.settings.password,
-			timeout : 10000,
+			timeout : 40000,
 			data : {
 				"DISABLED_CHECKBOX" : "",
 				"CHECK_ACTION_MODE" : "1",
@@ -114,7 +130,7 @@ app.toggleMode = function() {
 			app.getStatusCount = -1;
 			app.startTimer(4000); // ディレイを入れないと変更前の値が取れてしまう
 		}).fail(function(jqXHR, textStatus, errorThrown) {
-			$("#error").text("setting failed, " + errorThrown);
+			app.error("main.setting_failed", errorThrown);
 		});
 	}
 
@@ -138,7 +154,7 @@ app.reconnWimax = function() {
 			type : "POST",
 			username : "admin",
 			password : app.settings.password,
-			timeout : 10000,
+			timeout : 40000,
 			data : {
 				"DISABLED_CHECKBOX" : "",
 				"CHECK_ACTION_MODE" : "1",
@@ -150,7 +166,7 @@ app.reconnWimax = function() {
 			app.getStatusCount = -1;
 			app.startTimer(4000);
 		}).fail(function(jqXHR, textStatus, errorThrown) {
-			$("#error").text("setting failed, " + errorThrown);
+			app.error("main.setting_failed", errorThrown);
 		});
 	}
 
@@ -194,7 +210,7 @@ app.updateIndexInfo = function(successCallback, completeCallback) {
 		var r = app.routerInfo;
 		r.comSetting = 0;
 		r.profile = 0;
-		$("#error").text("index_contents failed, " + errorThrown);
+		app.error("main.retrieving_failed", errorThrown);
 	});
 }
 
@@ -218,9 +234,9 @@ app.standby = function() {
 				"SESSION_ID" : app.sessionIdInfoBtn
 			}
 		}).done(function(data, textStatus) {
-			$("#error").text("standby failed, " + textStatus);
+			app.error("main.standby_failed");
 		}).fail(function(jqXHR, textStatus, errorThrown) {
-			$("#error").text("standby succeeded, " + errorThrown);
+			app.error("main.standby_succeed");
 		});
 	}
 
@@ -247,7 +263,7 @@ app.updateInfoBtnInfo = function(successCallback, completeCallback) {
 			$("#error").text("info_btn parsing failed, " + e);
 		}
 	}).fail(function(jqXHR, textStatus, errorThrown) {
-		$("#error").text("info_btn failed, " + errorThrown);
+		app.error("main.retrieving_failed", errorThrown);
 	});
 }
 
@@ -295,7 +311,7 @@ app.getStatus = function() {
 		r.battery = "N/A";
 		r.antennaLevel = 0;
 		r.comState = 0;
-		$("#error").text("status_get.xml failed, " + errorThrown);
+		app.error("main.retrieving_failed", errorThrown);
 	});
 
 	if (onlyxml == false) {
@@ -330,19 +346,19 @@ app.callback = function() {
 	}
 	$("#reconn").prop("disabled", false);
 
-    if (app.prevCharging != r.charging) {
-    	app.alertNotified = false;
-    }
-	
+	if (app.prevCharging != r.charging) {
+		app.alertNotified = false;
+	}
+
 	if (app.prevBatt != -1 && app.alertNotified == false) {
 		var message = null;
 		if (r.battery > parseInt(app.settings.batt_notif_over) && r.battery > app.prevBatt && app.prevBatt > 0) {
-			message = "battery level over " + app.settings.batt_notif_over + "%";
+			message = t("main.batt_notif_over") + " " + app.settings.batt_notif_over + "%";
 		} else if (r.battery < parseInt(app.settings.batt_notif_under) && r.battery < app.prevBatt) {
-			message = "battery level under " + app.settings.batt_notif_under + "%";
+			message = t("main.batt_notif_under") + " " + app.settings.batt_notif_under + "%";
 		}
 		if (message != null) {
-	    	app.alertNotified = true;
+			app.alertNotified = true;
 			chrome.notifications.create("appnif_batt", {
 				type : "basic",
 				title : "NAD11 utility",
@@ -352,8 +368,8 @@ app.callback = function() {
 			});
 		}
 	}
-    app.prevBatt = r.battery;
-    app.prevCharging = r.charging;
+	app.prevBatt = r.battery;
+	app.prevCharging = r.charging;
 
 	if (app.settings.cb_notif && app.prevStatus != status) {
 		app.prevStatus = status;
@@ -414,5 +430,5 @@ app.callback = function() {
 
 $(document).ready(function() {
 	app.init();
-	app.startTimer();
+	app.startTimer(1);
 });
